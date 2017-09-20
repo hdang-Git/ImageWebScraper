@@ -7,5 +7,10 @@ ___
 
 ### Setup Notes
 * For Selenium integration on Windows, add to System Path Variable, the location of gecko driver (for Firefox) and/or chromedriver (for Chrome)
-
-ref: https://pypi.python.org/pypi/selenium 
+* For Anaconda library to include, run the following command:
+```sh
+conda install -c conda-forge selenium
+```
+### References 
+* https://pypi.python.org/pypi/selenium 
+* https://anaconda.org/conda-forge/selenium
