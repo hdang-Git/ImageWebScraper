@@ -6,14 +6,13 @@ Created on Wed Sep 20 23:56:30 2017
 
 
 This program scrapes the preview images from google search and writes them 
-to a file directory, using selenium to deal with the dynamic loading. 
+to a file directory. It uses selenium to deal with the dynamic loading. 
+
+In order to run, be sure to download the web drivers and add the path
+of the web drivers to the system variables. Look at the Readme for more info.
 """
 
-# id="rg_s"  div
-#class="rg_bx rg_di rg_el ivg-i"   div a img 
-
 from bs4 import BeautifulSoup
-import requests
 import shutil
 from selenium import webdriver
 import time
@@ -21,6 +20,12 @@ from urllib.request import urlopen
 import os
 import errno
 
+'''
+Function uses selenium to scroll through the page until it reaches the full 
+height of the web page and then gets the html page source.
+
+@param urlPage - url of google image page
+'''
 def getBrowserSrcPage(urlPage): 
     browser = webdriver.Firefox()
     browser.get(urlPage)
@@ -47,6 +52,12 @@ def getBrowserSrcPage(urlPage):
     browser.quit()
     return html_page
 
+'''
+Function uses BeautifulSoup to look for the image tags and retrieves the 
+image urls from the image tag's src attribute. 
+
+@param html_page - stores html text for retrieved google image page
+'''
 def scrapeImages(html_page):
     #Parse the google page for the image links
     imgLinks = []
@@ -67,25 +78,39 @@ def scrapeImages(html_page):
     print(len(imgLinks))
     return imgLinks
 
+'''
+Function open the url links to retrieve the preview image data and then calls
+writeImages() to write the image to the chosen directory.
+
+@param imgLinks - stores retrieved urls of preview images
+@param folderName - name of destination directory 
+'''
 def writeImagesToDir(imgLinks, folderName):
     #Write the image to file
     i = 0
     for imgUrl in imgLinks:
         fileName = folderName + '/' + str(i) + '.png'
         i += 1
-        print(i)
-        if imgUrl.startswith('data:image/jpeg;base64') or imgUrl.startswith('data:image/png;base64'):
-            response = urlopen(imgUrl)
-            writeImages(response, fileName)
-        else: 
-            response = requests.get(imgUrl.strip(), stream=True)
-            writeImages(response.raw, fileName)
+        print(str(i) + '/' + str(len(imgLinks)))
+        response = urlopen(imgUrl)
+        writeImages(response, fileName)
 
+'''
+Function writes the data/bytes of the image to the output file.
+ 
+@param response - stores image data
+@param fileName - name of the file
+'''
 def writeImages(response, fileName):
     with open(fileName, 'wb') as out_file:
         shutil.copyfileobj(response, out_file)
     del response
     
+'''
+Function creates a directory for images to be stored in.
+ 
+@param directory - name of output folder
+'''
 def createDirectory(directory):
     if not os.path.exists(directory):
         try:
@@ -93,7 +118,11 @@ def createDirectory(directory):
         except OSError as error:
             if error.errno != errno.EEXIST:
                 raise
-    
+
+'''
+Function controller which calls other functions to get the preview images 
+from Google image search.
+'''
 def main():
     url = 'https://www.google.com/search?q=watermelon&source=lnms&tbm=isch&sa=X&ved=0ahUKEwjkka2_h7PWAhUKiVQKHfhJDvMQ_AUICigB&biw=1709&bih=940'
     outputFolderName = 'watermelon'
@@ -101,5 +130,6 @@ def main():
     imagesUrls = scrapeImages(htmlPage)
     createDirectory(outputFolderName)
     writeImagesToDir(imagesUrls, outputFolderName)
+    print('Complete')
     
 main()
