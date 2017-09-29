@@ -44,10 +44,13 @@ def getBrowserSrcPage(urlPage, numImages):
     
         # Calculate new scroll height and compare with last scroll height
         new_height = browser.execute_script("return document.body.scrollHeight")
+        
+        #found image tags
         foundImgNum = browser.find_elements_by_xpath("/html/body//img[@class='rg_ic rg_i']")
         print(len(foundImgNum))
         totalImagesFound = len(foundImgNum)
-        
+#        footer = browser.find_elements_by_xpath("/html/body//div[@id='fbarcnt']")
+        footer = browser.find_element_by_id('fbarcnt')
         if new_height == last_height:
             #check if total images found is greater than passed parameter 
             if totalImagesFound >= numImages:
@@ -59,13 +62,15 @@ def getBrowserSrcPage(urlPage, numImages):
 #                    print('smb element size is 0')
 #                    browser.find_element_by_xpath("/html/body//input[@id='smb']").click()
                 
-                
                  #EAFP principle
-#                try:
-#                    browser.find_element_by_xpath("/html/body//input[@id='smb']").click()
-#                except:
-#                    print('Element \'show more results\' not interactable thus not visible')
-#                    print('max Elements: ' + str(totalImagesFound))
+                 #Keep scrolling until it can't click on 'show more results' and footer is visible
+                try:
+                    browser.find_element_by_xpath("/html/body//input[@id='smb']").click()
+                except:
+                    print('Element \'show more results\' not interactable thus not visible')
+                    print('max Elements: ' + str(totalImagesFound))
+                    if footer.is_displayed():
+                        break;
         last_height = new_height
         
     html_source = browser.page_source
@@ -148,9 +153,9 @@ def main():
     url = 'https://www.google.com/search?q=watermelon&source=lnms&tbm=isch&sa=X&ved=0ahUKEwjkka2_h7PWAhUKiVQKHfhJDvMQ_AUICigB&biw=1709&bih=940'
     outputFolderName = 'watermelon'
     htmlPage = getBrowserSrcPage(url, 1000);
-#    imagesUrls = scrapeImages(htmlPage)
-#    createDirectory(outputFolderName)
-#    writeImagesToDir(imagesUrls, outputFolderName)
+    imagesUrls = scrapeImages(htmlPage)
+    createDirectory(outputFolderName)
+    writeImagesToDir(imagesUrls, outputFolderName)
     print('Complete')
     
 main()
